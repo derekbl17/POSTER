@@ -16,10 +16,10 @@ const postSchema = new mongoose.Schema({
     imageUrl: {
       type: String,
       required: true,
-      validate: {
-        validator: v => /^(https?:\/\/).+\.(jpg|jpeg|png|webp|gif)$/i.test(v),
-        message: props => `${props.value} is not a valid image URL!`
-      }
+      // validate: {
+      //   validator: v => /^(https?:\/\/).+\.(jpg|jpeg|png|webp|gif)$/i.test(v),
+      //   message: props => `${props.value} is not a valid image URL!`
+      // }
     },
     
     // Relationships
@@ -35,15 +35,30 @@ const postSchema = new mongoose.Schema({
     },
     
     // Metadata
+    status: {
+      type: String,
+      enum: {
+        values: ['active', 'blocked'],
+        message: 'Status must be either active or blocked'
+      },
+      default: 'active'
+    },
+    blockedReason: {
+      type: String,
+      select: false, // Only visible to admins
+      maxlength: 500
+    },
     likes: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      unique: true
     }],
     createdAt: {
       type: Date,
       default: Date.now
     }
   }, {
+    timestamps:true,
     toJSON: { virtuals: true },  // Include virtuals when converting to JSON
     toObject: { virtuals: true } // Include virtuals when converting to objects
   });
@@ -60,5 +75,14 @@ const postSchema = new mongoose.Schema({
   postSchema.index({ title: 'text', description: 'text' });
   postSchema.index({ createdAt: -1 });
   postSchema.index({ category: 1 });
+
+  // Query Helpers
+postSchema.query.active = function() {
+  return this.where({ status: 'active' });
+};
+
+postSchema.query.blocked = function() {
+  return this.where({ status: 'blocked' });
+};
   
 module.exports=mongoose.model('Post',postSchema)
