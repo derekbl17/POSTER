@@ -24,4 +24,14 @@ const deleteCategory=asyncHandler(async(req,res)=>{
     res.status(200).json({id:req.params.id})
 })
 
-module.exports={addCategory,deleteCategory}
+const getCategories=asyncHandler(async(req,res)=>{
+    const categories=await Category.find({}).select('_id name')
+
+    if (!categories){
+        res.status(400)
+        throw new Error('No categories')
+    }
+    console.log(categories)
+    res.status(200).json(categories)
+})
+module.exports={addCategory,deleteCategory,getCategories}

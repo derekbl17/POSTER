@@ -1,16 +1,18 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { Navigate, Outlet, useOutletContext } from "react-router-dom";
+import Loader from "./Loader";
 
 const PrivateRoute = ({ allowed }) => {
-  const { userInfo } = useSelector((state) => state.auth);
+  console.log("priv route");
+  const { user } = useOutletContext() || {};
+  const role = user?.role;
 
-  if (!userInfo) {
-    console.log("no user info");
-    return <Navigate to="/login" replace />;
-  }
+  console.log(user);
 
-  if (!allowed.includes(userInfo.role)) {
-    console.log("no authorization");
+  if (!user) return <Navigate to="/login" />;
+
+  if (!role) return <Loader />;
+
+  if (!allowed.includes(role)) {
     return <Navigate to="/no-auth" replace />;
   }
 

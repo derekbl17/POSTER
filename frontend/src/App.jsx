@@ -3,19 +3,32 @@ import { Container } from "react-bootstrap";
 import Header from "./components/Header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useGetUserDetailsQuery } from "./slices/usersApiSlice";
 import { setCredentials, clearCredentials } from "./slices/authSlice";
 import { useDispatch } from "react-redux";
 import Loader from "./components/Loader";
 import { useLogoutMutation } from "./slices/usersApiSlice";
+import { useSelector } from "react-redux";
 
 function App() {
   const dispatch = useDispatch();
+  const refetchTrigger = useSelector((state) => state.auth.refetchTrigger);
+  const {
+    data: userData,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetUserDetailsQuery(undefined, {
+    refetchOnMountOrArgChange: true, // Important for direct URL access
+  });
   const [logoutApiCall] = useLogoutMutation();
 
-  // 1. Attempt to fetch user data if cookie exists
-  const { data: userData, isLoading, isError } = useGetUserDetailsQuery();
+  useEffect(() => {
+    if (refetchTrigger) {
+      refetch();
+    }
+  }, [refetchTrigger]);
 
   // 2. Update Redux state if successful
   useEffect(() => {
@@ -47,7 +60,7 @@ function App() {
       <Header />
       <ToastContainer />
       <Container className="my-2">
-        <Outlet />
+        <Outlet context={{ user: userData }} />
       </Container>
     </>
   );

@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useLogoutMutation } from "../slices/usersApiSlice";
 import { clearCredentials } from "../slices/authSlice";
+import { persistor } from "../store";
 
 export default function Header() {
   const { userInfo } = useSelector((state) => state.auth);
@@ -17,6 +18,7 @@ export default function Header() {
     try {
       await logoutApiCall().unwrap();
       dispatch(clearCredentials());
+      persistor.purge();
       navigate("/");
     } catch (err) {
       console.log(err);

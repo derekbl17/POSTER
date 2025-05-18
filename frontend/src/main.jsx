@@ -1,9 +1,9 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import store from "./store.js";
+import { PersistGate } from "redux-persist/integration/react";
+import store, { persistor } from "./store.js";
 import { Provider } from "react-redux";
 import App from "./App.jsx";
 import HomeScreen from "./screens/HomeScreen.jsx";
@@ -14,6 +14,8 @@ import PrivateRoute from "./components/PrivateRoute.jsx";
 import AdminScreen from "./screens/AdminScreen.jsx";
 import NotFoundScreen from "./screens/NotFoundScreen.jsx";
 import NoAuthorization from "./screens/NoAuthorization.jsx";
+import NewPostScreen from "./screens/NewPostScreen.jsx";
+import Loader from "./components/Loader.jsx";
 
 const router = createBrowserRouter([
   {
@@ -27,7 +29,10 @@ const router = createBrowserRouter([
       {
         path: "",
         element: <PrivateRoute allowed={["user", "admin"]} />,
-        children: [{ path: "profile", element: <ProfileScreen /> }],
+        children: [
+          { path: "profile", element: <ProfileScreen /> },
+          { path: "post", element: <NewPostScreen /> },
+        ],
       },
       {
         path: "admin",
@@ -41,8 +46,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <Provider store={store}>
-    <StrictMode>
+    <PersistGate loading={<Loader />} persistor={persistor}>
       <RouterProvider router={router} />
-    </StrictMode>
+    </PersistGate>
   </Provider>
 );
